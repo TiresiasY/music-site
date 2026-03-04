@@ -127,6 +127,34 @@ body {
   flex-shrink: 0;
 }
 
+.btn-download {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+}
+
+.track-item:hover .btn-download { opacity: 1; }
+.btn-download:hover { color: var(--accent); }
+.btn-download:disabled { cursor: default; opacity: 0.5; }
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .btn-download { opacity: 0.6; }
+}
+
 /* equalizer animation for playing track */
 .track-item .eq-bars {
   display: none;

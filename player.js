@@ -110,6 +110,9 @@ function filterByTag() {
 }
 
 // ---- Render ----
+const DOWNLOAD_ICON = `<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zm-8 2V5h2v6h1.17L12 13.17 9.83 11H11zm-6 7h14v2H5v-2z"/></svg>`;
+const LOADING_ICON = `<svg viewBox="0 0 24 24" width="16" height="16" style="animation:spin 1s linear infinite"><path fill="currentColor" d="M12 4V2A10 10 0 0 0 2 12h2a8 8 0 0 1 8-8z"/></svg>`;
+
 function renderPlaylist() {
   playlist.innerHTML = tracks.map((t, i) => `
     <div class="track-item${i === currentIndex ? ' active' : ''}" data-index="${i}">
@@ -121,6 +124,7 @@ function renderPlaylist() {
         <div class="name">${esc(t.title)}</div>
       </div>
       <div class="duration">${t.duration || ''}</div>
+      <button class="btn-download" data-index="${i}" title="下载">${DOWNLOAD_ICON}</button>
     </div>
   `).join('');
 
@@ -135,6 +139,43 @@ function renderPlaylist() {
       }
     });
   });
+
+  // 点击下载
+  playlist.querySelectorAll('.btn-download').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      downloadTrack(parseInt(btn.dataset.index));
+    });
+  });
+}
+
+// ---- Download ----
+async function downloadTrack(idx) {
+  const track = tracks[idx];
+  const url = track.driveId ? gdriveDirectUrl(track.driveId) : track.src;
+  const btn = playlist.querySelector(`.btn-download[data-index="${idx}"]`);
+
+  if (btn) { btn.innerHTML = LOADING_ICON; btn.disabled = true; }
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const blob = await res.blob();
+    const ext = (blob.type.split('/')[1] || 'mp3').split(';')[0];
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = `${track.title}.${ext}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+  } catch (e) {
+    console.error('Download failed', e);
+    alert('下载失败，请检查网络或 API Key');
+  } finally {
+    if (btn) { btn.innerHTML = DOWNLOAD_ICON; btn.disabled = false; }
+  }
 }
 
 function esc(s) {
