@@ -3,17 +3,15 @@
   "tracks": [
     {
       "title": "高速公路上的森林",
-      "artist": "艺术家名",
       "driveId": "1abupYmU3qbizWdxOEzKC74nurcXzsTAD",
-      "cover": "",
-      "duration": "6:37"
+      "duration": "6:37",
+      "tags": ["我的最爱", "工作BGM"]
     },
     {
       "title": "示例曲目 2",
-      "artist": "艺术家名",
       "driveId": "Google_Drive_文件ID",
-      "cover": "",
-      "duration": "4:12"
+      "duration": "4:12",
+      "tags": ["睡前"]
     }
   ]
 }

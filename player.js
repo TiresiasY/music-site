@@ -12,14 +12,6 @@ function gdriveDirectUrl(fileId) {
   return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${window.__GDRIVE_API_KEY__}`;
 }
 
-// 封面：如果是 Google Drive ID 则转直链，否则原样返回
-function coverUrl(src) {
-  if (!src) return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"><rect fill="%23222" width="1" height="1"/></svg>';
-  if (src.startsWith('http')) return src;
-  // 假设是 Google Drive file ID
-  return `https://drive.google.com/thumbnail?id=${src}&sz=w200`;
-}
-
 // 格式化时间
 function fmt(sec) {
   if (!sec || isNaN(sec)) return '0:00';
@@ -29,9 +21,11 @@ function fmt(sec) {
 }
 
 // ---- State ----
-let tracks = [];
+let allTracks = [];  // 全部曲目
+let tracks = [];     // 当前筛选后的曲目
 let currentIndex = -1;
 let isPlaying = false;
+let activeTag = null; // 当前选中标签，null 为全部
 
 // ---- DOM ----
 const audio       = document.getElementById('audio');
@@ -46,9 +40,7 @@ const progressBar = document.getElementById('progressBar');
 const timeCurrent = document.getElementById('timeCurrent');
 const timeDuration= document.getElementById('timeDuration');
 const volumeBar   = document.getElementById('volumeBar');
-const coverThumb  = document.getElementById('coverThumb');
 const nowTitle    = document.getElementById('nowTitle');
-const nowArtist   = document.getElementById('nowArtist');
 
 // ---- Load Config ----
 // API Key 优先从 URL hash 读取（格式: #key=AIzaXXX），其次从 music.json
@@ -63,13 +55,58 @@ async function init() {
     const res = await fetch(CONFIG_URL);
     const data = await res.json();
     window.__GDRIVE_API_KEY__ = getApiKeyFromHash() || data.googleDriveApiKey || '';
-    tracks = data.tracks || [];
+    allTracks = data.tracks || [];
+    tracks = allTracks;
+    renderTags();
     renderPlaylist();
     trackCount.textContent = `${tracks.length} tracks`;
   } catch (e) {
     playlist.innerHTML = '<div style="padding:40px;text-align:center;color:#666;">无法加载播放列表，请检查 music.json</div>';
     console.error(e);
   }
+}
+
+// ---- Tags ----
+const tagsBar = document.getElementById('tagsBar');
+
+function renderTags() {
+  // 从所有曲目中收集标签
+  const tagSet = new Set();
+  allTracks.forEach(t => {
+    if (t.tags) t.tags.forEach(tag => tagSet.add(tag));
+  });
+  if (tagSet.size === 0) { tagsBar.style.display = 'none'; return; }
+
+  const tags = [...tagSet];
+  tagsBar.innerHTML = `<button class="tag-btn${!activeTag ? ' active' : ''}" data-tag="">全部</button>` +
+    tags.map(tag => `<button class="tag-btn${activeTag === tag ? ' active' : ''}" data-tag="${esc(tag)}">${esc(tag)}</button>`).join('');
+
+  tagsBar.querySelectorAll('.tag-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tag = btn.dataset.tag;
+      activeTag = tag || null;
+      filterByTag();
+      renderTags();
+      renderPlaylist();
+    });
+  });
+}
+
+function filterByTag() {
+  if (!activeTag) {
+    tracks = allTracks;
+  } else {
+    tracks = allTracks.filter(t => t.tags && t.tags.includes(activeTag));
+  }
+  // 更新 currentIndex：找到当前播放曲目在筛选后列表中的位置
+  if (currentIndex >= 0) {
+    const playingSrc = audio.src;
+    currentIndex = tracks.findIndex(t => {
+      const url = t.driveId ? gdriveDirectUrl(t.driveId) : t.src;
+      return url === playingSrc;
+    });
+  }
+  trackCount.textContent = `${tracks.length} tracks`;
 }
 
 // ---- Render ----
@@ -80,10 +117,8 @@ function renderPlaylist() {
         <span class="index-num">${i + 1}</span>
         <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
       </div>
-      <img class="cover" src="${coverUrl(t.cover)}" alt="" loading="lazy">
       <div class="meta">
         <div class="name">${esc(t.title)}</div>
-        <div class="artist">${esc(t.artist || '')}</div>
       </div>
       <div class="duration">${t.duration || ''}</div>
     </div>
@@ -162,10 +197,7 @@ function updateUI() {
   // 底栏信息
   if (currentIndex >= 0) {
     const t = tracks[currentIndex];
-    nowTitle.textContent  = t.title;
-    nowArtist.textContent = t.artist || '-';
-    coverThumb.src = coverUrl(t.cover);
-    coverThumb.style.display = '';
+    nowTitle.textContent = t.title;
   }
 
   // 高亮列表
@@ -226,9 +258,6 @@ document.addEventListener('keydown', e => {
   if (e.code === 'ArrowLeft')  { e.preventDefault(); playPrev(); }
   if (e.code === 'ArrowRight') { e.preventDefault(); playNext(); }
 });
-
-// 隐藏默认封面
-coverThumb.style.display = 'none';
 
 // 启动
 init();

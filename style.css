@@ -47,6 +47,30 @@ body {
   color: var(--text-dim);
 }
 
+/* === Tags Bar === */
+.tags-bar {
+  display: flex;
+  gap: 8px;
+  padding: 4px 32px 12px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.tag-btn {
+  background: transparent;
+  border: 1px solid #333;
+  color: var(--text-dim);
+  padding: 5px 14px;
+  border-radius: 16px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.tag-btn:hover { border-color: #555; color: var(--text); }
+.tag-btn.active { background: #fff; color: #000; border-color: #fff; }
+
 /* === Playlist === */
 .playlist {
   flex: 1;
@@ -82,15 +106,6 @@ body {
 
 .track-item.active .index { color: var(--accent); }
 
-.track-item .cover {
-  width: 44px;
-  height: 44px;
-  border-radius: 6px;
-  object-fit: cover;
-  background: #222;
-  flex-shrink: 0;
-}
-
 .track-item .meta {
   flex: 1;
   min-width: 0;
@@ -105,15 +120,6 @@ body {
 }
 
 .track-item.active .name { color: var(--accent); }
-
-.track-item .artist {
-  font-size: 12px;
-  color: var(--text-dim);
-  margin-top: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 
 .track-item .duration {
   font-size: 12px;
@@ -170,20 +176,10 @@ body {
 .now-playing {
   display: flex;
   align-items: center;
-  gap: 12px;
   width: 220px;
   flex-shrink: 0;
+  min-width: 0;
 }
-
-.cover-thumb {
-  width: 48px;
-  height: 48px;
-  border-radius: 6px;
-  object-fit: cover;
-  background: #222;
-}
-
-.track-info { min-width: 0; }
 
 .track-title {
   font-size: 13px;
@@ -191,12 +187,6 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.track-artist {
-  font-size: 11px;
-  color: var(--text-dim);
-  margin-top: 1px;
 }
 
 /* Controls */
