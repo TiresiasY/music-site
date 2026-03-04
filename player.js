@@ -51,11 +51,18 @@ const nowTitle    = document.getElementById('nowTitle');
 const nowArtist   = document.getElementById('nowArtist');
 
 // ---- Load Config ----
+// API Key 优先从 URL hash 读取（格式: #key=AIzaXXX），其次从 music.json
+function getApiKeyFromHash() {
+  const hash = location.hash.slice(1);
+  const params = new URLSearchParams(hash);
+  return params.get('key') || '';
+}
+
 async function init() {
   try {
     const res = await fetch(CONFIG_URL);
     const data = await res.json();
-    window.__GDRIVE_API_KEY__ = data.googleDriveApiKey || '';
+    window.__GDRIVE_API_KEY__ = getApiKeyFromHash() || data.googleDriveApiKey || '';
     tracks = data.tracks || [];
     renderPlaylist();
     trackCount.textContent = `${tracks.length} tracks`;
