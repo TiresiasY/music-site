@@ -1,0 +1,19 @@
+{
+  "googleDriveApiKey": "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",
+  "tracks": [
+    {
+      "title": "示例曲目 1",
+      "artist": "艺术家名",
+      "driveId": "1abupYmU3qbizWdxOEzKC74nurcXzsTAD",
+      "cover": "",
+      "duration": "6:37"
+    },
+    {
+      "title": "示例曲目 2",
+      "artist": "艺术家名",
+      "driveId": "Google_Drive_文件ID",
+      "cover": "",
+      "duration": "4:12"
+    }
+  ]
+}
