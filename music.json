@@ -61,11 +61,16 @@
       "duration": "25:00",
       "tags": ["科幻"]
     },
-
     {
       "title": "永久冻土（下）",
       "driveId": "10hNuEqYBIgjn59xUPTJTFxSSOvzYkJzh",
       "duration": "23:55",
+      "tags": ["科幻"]
+    },
+    {
+      "title": "洛基7281",
+      "driveId": "1bq_ARTGbjkxL-HbOmiqtLKYZoGoOR8To",
+      "duration": "13:21",
       "tags": ["科幻"]
     }
   ]
